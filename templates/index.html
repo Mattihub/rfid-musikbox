@@ -40,6 +40,21 @@
     {% endif %}
 </div>
 
+<div class="scan-box">
+    <h2>Wiedergabe testen (ohne Karte)</h2>
+    <form method="post" id="test-play-form">
+        <select name="folder" id="test-folder-select">
+            {% for folder in folders %}
+            <option value="{{ folder }}">{{ folder }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" formaction="" onclick="this.form.action='/test-play/' + document.getElementById('test-folder-select').value; return true;">Abspielen</button>
+    </form>
+    <form method="post" action="{{ url_for('test_stop') }}" class="inline">
+        <button type="submit">Stopp</button>
+    </form>
+</div>
+
 <h2>Bestehende Zuordnungen</h2>
 <table>
     <tr><th>UID</th><th>Ordner</th><th></th></tr>

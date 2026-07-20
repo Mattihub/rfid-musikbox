@@ -3,6 +3,19 @@ import json
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for
 from storage import MappingStorage
+from player import MPDPlayer
+
+MPD_HOST = os.environ.get("RFID_MPD_HOST", "localhost")
+MPD_PORT = int(os.environ.get("RFID_MPD_PORT", "6600"))
+
+
+def get_player() -> MPDPlayer | None:
+    """Baut bei Bedarf eine MPD-Verbindung auf. Gibt None zurück, falls MPD nicht erreichbar ist."""
+    try:
+        return MPDPlayer(host=MPD_HOST, port=MPD_PORT)
+    except Exception as e:
+        print(f"[webapp] Konnte nicht mit MPD verbinden: {e}")
+        return None
 
 # Pfade über Umgebungsvariablen konfigurierbar (Standardwerte = Pi-Pfade fürs Produktivsystem)
 MUSIC_DIR = os.environ.get("RFID_MUSIC_DIR", "/home/pi/musik")
@@ -53,6 +66,21 @@ def assign():
 @app.route("/delete/<uid>", methods=["POST"])
 def delete(uid):
     storage.delete_mapping(uid)
+    return redirect(url_for("index"))
+
+@app.route("/test-play/<folder>", methods=["POST"])
+def test_play(folder):
+    player = get_player()
+    if player:
+        player.play_folder(folder)
+    return redirect(url_for("index"))
+
+
+@app.route("/test-stop", methods=["POST"])
+def test_stop():
+    player = get_player()
+    if player:
+        player.stop()
     return redirect(url_for("index"))
 
 
